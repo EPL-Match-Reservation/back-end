@@ -1,40 +1,32 @@
 class MatchService {
-    // Other methods...
- constructor({ MatchRepository }) {
+  // Other methods...
+  constructor({ MatchRepository }) {
     this.MatchRepository = MatchRepository;
   }
 
+  async getMatchById(matchId) {
+    let match = await this.MatchRepository.getMatch(matchId);
 
-    async getMatchById(matchId) {
-       
-            let match = await this.MatchRepository.getMatch(matchId);
-    
-            if (!match) {
-                return { success: false };
-            }
-    
-            return { success: true, data: match };
-     
+    if (!match) {
+      return { success: false };
     }
-    async createMatch(match) {
-       
-      let data = await this.MatchRepository.createMatch(match);
 
-      
-      return { success: true, data: data };
+    return { success: true, data: match };
+  }
+  async createMatch(match) {
+    let data = await this.MatchRepository.createMatch(match);
 
-}
-    async retrievematches() {
-          
-      let matches = await this.MatchRepository.retrievematches();
+    return { success: true, data: data };
+  }
+  async retrievematches() {
+    let matches = await this.MatchRepository.retrievematches();
 
-      if (!matches) {
-          return { success: false };
-      }
-
-      return { success: true, data: matches };
-
+    if (!matches) {
+      return { success: false };
     }
+
+    return { success: true, data: matches };
+  }
 }
 
 module.exports = MatchService;
