@@ -24,8 +24,8 @@ app.use((req, res, next) => {
 // 3) ROUTES
 
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/match", matchRouter);
-// app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/auth", authRouter);
+// app.use("/api/v1/match", matchRouter);
 // app.use("/api/v1/stadium", matchRouter);
 // app.use("/api/v1/reservation", matchRouter);
 
