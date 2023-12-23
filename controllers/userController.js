@@ -30,6 +30,7 @@ exports.validateSignUp = [
         return res.status(400).json({
           status: "error",
           message: "Error in signUP",
+          ErrorMessage: errors,
         });
       }
       next();
@@ -52,11 +53,10 @@ exports.createUser = async (req, res) => {
       city,
       address,
       email,
-      role,
     } = req.body;
     // if env is dev
     if (process.env.NODE_ENV === "development") {
-      console.log(req.body)
+      console.log(req.body);
     }
     //check if the user already exists
     var user = await User.findOne({
@@ -75,8 +75,9 @@ exports.createUser = async (req, res) => {
       city: city,
       address: address,
       email: email,
-      role: role,
     });
+    // set user role to fan
+    user.role = "Fan";
     //hash the password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
@@ -104,7 +105,7 @@ exports.loginUser = async (req, res) => {
     const { username, password } = req.body;
     // if env is dev
     if (process.env.NODE_ENV === "development") {
-      console.log(req.body)
+      console.log(req.body);
     }
     //check if the user already exists
     let user = await User.findOne({ username: username });
@@ -136,40 +137,281 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-// get all users
+// get all users (Approved) if is admin
 exports.getAllUsers = async (req, res) => {
   try {
-    // get all approved users
+    // get the role of the requeseter form the token
+    const token = req.headers["authorization"];
+    // if token is undefined
+    if (!token) {
+      return res.status(400).json({ message: "You are not logged in" });
+    }
+    const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET_KEY);
+    const role = decoded.role;
+    // if env is dev
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
+    //check if the user is admin
+    if (role !== "Admin") {
+      return res.status(400).json({ message: "You are not an Admin" });
+    }
+    // get all users
     const users = await User.find({ approved: true });
+    // drop password field
+    users.forEach((user) => {
+      user.password = undefined;
+    });
     res.status(200).json({ message: "Successful get all users", data: users });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
+// get all non approved users if is admin
+exports.getAllNonApprovedUsers = async (req, res) => {
+  try {
+    // get the role of the requeseter form the token
+    const token = req.headers["authorization"];
+    // if token is undefined
+    if (!token) {
+      return res.status(400).json({ message: "You are not logged in" });
+    }
+    const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET_KEY);
+    const role = decoded.role;
+    // if env is dev
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
+    //check if the user is admin
+    if (role !== "Admin") {
+      return res.status(400).json({ message: "You are not an Admin" });
+    }
+    // get all non approved users
+    const users = await User.find({ approved: false });
+    // drop password field
+    users.forEach((user) => {
+      user.password = undefined;
+    });
+    res
+      .status(200)
+      .json({ message: "Successful get all non approved users", data: users });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 // check username
-
-
-
-/////////////////////////////////////////////////////////////////////
-
-
-
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: "error",
-    message: "This route is not yet defined -haha",
-  });
+exports.checkUsername = async (req, res) => {
+  try {
+    const { username } = req.body;
+    // if env is dev
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
+    //check if the user already exists
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ bool: "false", message: "User Name does not exist" });
+    }
+    res.status(200).json({ bool: "true", message: "User Name exists" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
-exports.updateUser = (req, res) => {
-  res.status(500).json({
-    status: "error",
-    message: "This route is not yet defined -haha",
-  });
+
+// deleteuser make sure it is an admin
+exports.deleteUser = async (req, res) => {
+  try {
+    // get the role of the requeseter form the token
+    const token = req.headers["authorization"];
+    // if token is undefined
+    if (!token) {
+      return res.status(400).json({ message: "You are not logged in" });
+    }
+    const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET_KEY);
+    const role = decoded.role;
+    // if env is dev
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
+    //check if the user is admin
+    if (role !== "Admin") {
+      return res.status(400).json({ message: "You are not an Admin" });
+    }
+    //get the requested user from the request param
+    const username = req.params.id;
+    // if env is dev
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
+    //check if the user already exists
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist" });
+    }
+    //delete the user
+    await User.deleteOne({ username: username });
+    res.status(200).json({ message: "Successful delete user" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
-exports.deleteUser = (req, res) => {
-  res.status(500).json({
-    status: "error",
-    message: "This route is not yet defined -haha",
-  });
+
+// approve user if the one calling the requset is Admin and the user he want to approve is existing
+exports.approveUser = async (req, res) => {
+  try {
+    // get the role of the requeseter form the token
+    const token = req.headers["authorization"];
+    // if token is undefined
+    if (!token) {
+      return res.status(400).json({ message: "You are not logged in" });
+    }
+    const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET_KEY);
+    const role = decoded.role;
+    // if env is dev
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
+    //check if the user is admin
+    if (role !== "Admin") {
+      return res.status(400).json({ message: "You are not an Admin" });
+    }
+    //get the requested user from the request param
+    const username = req.params.id;
+    // if env is dev
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
+    //check if the user already exists
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist" });
+    }
+    //check if the user is already approved
+    if (user.approved) {
+      return res.status(400).json({ message: "User is already approved" });
+    }
+    //approve the user
+    await User.updateOne({ username: username }, { approved: true });
+    res.status(200).json({ message: "Successful approve user" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// update user to be manager
+exports.updateUserToManager = async (req, res) => {
+  try {
+    // get the role of the requeseter form the token
+    const token = req.headers["authorization"];
+    // if token is undefined
+    if (!token) {
+      return res.status(400).json({ message: "You are not logged in" });
+    }
+    const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET_KEY);
+    const role = decoded.role;
+    // if env is dev
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
+    //check if the user is admin
+    if (role !== "Admin") {
+      return res.status(400).json({ message: "You are not an Admin" });
+    }
+    //get the requested user from the request body
+    const username = req.params.id;
+    // if env is dev
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
+    //check if the user already exists
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist" });
+    }
+    //check if the user is already a manager
+    if (user.role === "Manager") {
+      return res.status(400).json({ message: "User is already a manager" });
+    }
+    //update the user to be a manager
+    await User.updateOne({ username: username }, { role: "Manager" });
+    res.status(200).json({ message: "Successful update user to be a manager" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// update user it should be his  own data
+exports.updateUser = async (req, res) => {
+  try {
+    // get the role of the requeseter form the token
+    const token = req.headers["authorization"];
+    // if token is undefined
+    if (!token) {
+      return res.status(400).json({ message: "You are not logged in" });
+    }
+    const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET_KEY);
+    //get the requested user from the request params
+    const username = req.params.id;
+    // if env is dev
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
+    //check if the user already exists
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist" });
+    }
+    //check if the user is the one who is calling the request
+    console.log(decoded.role);
+    if (username !== decoded.username && decoded.role !== "Admin") {
+      return res.status(400).json({ message: "You are not the user" });
+    }
+    //update the user
+    // if password changed hash it
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      req.body.password = await bcrypt.hash(req.body.password, salt);
+    }
+    await User.updateOne({ username: username }, req.body);
+    res.status(200).json({ message: "Successful update user" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// get user by username if admin and username in param
+exports.getUser = async (req, res) => {
+  try {
+    // get the role of the requeseter form the token
+    const token = req.headers["authorization"];
+    // if token is undefined
+    if (!token) {
+      return res.status(400).json({ message: "You are not logged in" });
+    }
+    const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET_KEY);
+    const role = decoded.role;
+    const username = req.params.id;
+    // if env is dev
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
+    //check if the user is admin
+    if (role !== "Admin") {
+      return res.status(400).json({ message: "You are not an Admin" });
+    }
+    //check if the user already exists
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist" });
+    }
+    // drop password field
+    user.password = undefined;
+    res.status(200).json({ message: "Successful get user", data: user });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };

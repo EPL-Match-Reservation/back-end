@@ -1,13 +1,21 @@
-const express = require('express');
+const express = require("express");
 
-const userController = require('../controllers/userController');
+const userController = require("../controllers/userController");
 
 const Router = express.Router();
 
-Router.route('/')
-  .get(userController.getAllUsers)
-  .post(userController.createUser);
-Router.route('/:id')
+Router.route("/").get(userController.getAllUsers);
+
+Router.route("/nonapproved").get(userController.getAllNonApprovedUsers);
+
+Router.route("/checkusername").post(userController.checkUsername);
+
+Router.route("/approve/:id").patch(userController.approveUser);
+
+// update user to manager
+Router.route("/updatetomanager/:id").patch(userController.updateUserToManager);
+
+Router.route("/:id")
   .get(userController.getUser)
   .patch(userController.updateUser)
   .delete(userController.deleteUser);
