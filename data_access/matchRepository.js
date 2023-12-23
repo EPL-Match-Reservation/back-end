@@ -20,5 +20,10 @@ class MatchRepository extends Repository {
 
     return result;
   }
+  async editMatch(matchId) {
+    const result = await this.model.findById(matchId);
+
+    return result;
+    }
 }
 module.exports = MatchRepository;
