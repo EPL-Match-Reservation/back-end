@@ -27,6 +27,22 @@ class MatchService {
 
     return { success: true, data: matches };
   }
+  async editMatch(matchId) {
+          
+    try {
+      const match = await this.MatchRepository.editMatch(matchId);
+  
+      if (!match) {
+        return null; // Match not found
+      }
+  
+      return match;
+    } catch (error) {
+      console.error("Error fetching match:", error);
+      throw error; // Propagate the error
+    }
+  }
+
 }
 
 module.exports = MatchService;
