@@ -5,6 +5,7 @@ const morgan = require("morgan");
 const userRouter = require(`${__dirname}/routes/userRouter`);
 const matchRouter = require(`${__dirname}/routes/matchRouter`);
 const authRouter = require(`${__dirname}/routes/authRouter`);
+const stadiumRouter = require(`${__dirname}/routes/stadiumRouter`);
 
 const app = express();
 
@@ -25,6 +26,8 @@ app.use((req, res, next) => {
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/match", matchRouter);
+app.use("/api/v1/stadium", stadiumRouter);
 // app.use("/api/v1/match", matchRouter);
 // app.use("/api/v1/stadium", matchRouter);
 // app.use("/api/v1/reservation", matchRouter);

@@ -95,7 +95,7 @@ exports.createUser = async (req, res) => {
         "x-auth-token": token,
       });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return  res.status(400).json({ message: error.message });
   }
 };
 
@@ -133,7 +133,7 @@ exports.loginUser = async (req, res) => {
         "x-auth-token": token,
       });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return  res.status(400).json({ message: error.message });
   }
 };
 
@@ -162,9 +162,9 @@ exports.getAllUsers = async (req, res) => {
     users.forEach((user) => {
       user.password = undefined;
     });
-    res.status(200).json({ message: "Successful get all users", data: users });
+    return  res.status(200).json({ message: "Successful get all users", data: users });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return  res.status(400).json({ message: error.message });
   }
 };
 
@@ -193,11 +193,11 @@ exports.getAllNonApprovedUsers = async (req, res) => {
     users.forEach((user) => {
       user.password = undefined;
     });
-    res
+    return  res
       .status(200)
       .json({ message: "Successful get all non approved users", data: users });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return  res.status(400).json({ message: error.message });
   }
 };
 
@@ -216,9 +216,9 @@ exports.checkUsername = async (req, res) => {
         .status(400)
         .json({ bool: "false", message: "User Name does not exist" });
     }
-    res.status(200).json({ bool: "true", message: "User Name exists" });
+    return  res.status(200).json({ bool: "true", message: "User Name exists" });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return  res.status(400).json({ message: error.message });
   }
 };
 
@@ -254,9 +254,9 @@ exports.deleteUser = async (req, res) => {
     }
     //delete the user
     await User.deleteOne({ username: username });
-    res.status(200).json({ message: "Successful delete user" });
+    return  res.status(200).json({ message: "Successful delete user" });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return  res.status(400).json({ message: error.message });
   }
 };
 
@@ -296,9 +296,9 @@ exports.approveUser = async (req, res) => {
     }
     //approve the user
     await User.updateOne({ username: username }, { approved: true });
-    res.status(200).json({ message: "Successful approve user" });
+    return  res.status(200).json({ message: "Successful approve user" });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return  res.status(400).json({ message: error.message });
   }
 };
 
@@ -338,9 +338,9 @@ exports.updateUserToManager = async (req, res) => {
     }
     //update the user to be a manager
     await User.updateOne({ username: username }, { role: "Manager" });
-    res.status(200).json({ message: "Successful update user to be a manager" });
+    return  res.status(200).json({ message: "Successful update user to be a manager" });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return  res.status(400).json({ message: error.message });
   }
 };
 
@@ -377,9 +377,9 @@ exports.updateUser = async (req, res) => {
       req.body.password = await bcrypt.hash(req.body.password, salt);
     }
     await User.updateOne({ username: username }, req.body);
-    res.status(200).json({ message: "Successful update user" });
+    return  res.status(200).json({ message: "Successful update user" });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return  res.status(400).json({ message: error.message });
   }
 };
 
@@ -410,8 +410,8 @@ exports.getUser = async (req, res) => {
     }
     // drop password field
     user.password = undefined;
-    res.status(200).json({ message: "Successful get user", data: user });
+    return  res.status(200).json({ message: "Successful get user", data: user });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return  res.status(400).json({ message: error.message });
   }
 };
