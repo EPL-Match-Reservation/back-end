@@ -452,9 +452,9 @@ exports.getUser = async (req, res) => {
 exports.reserve = async (req, res) => {
   try {
     const { match_id } = req.params;
-    const { row, column, creditCardNumber, creditPinNumber } = req.body;
+    const { row, column, creditCardNumber, creditPinNumber, price } = req.body;
 
-    if (!match_id || !row || !column || !creditCardNumber || !creditPinNumber) {
+    if (!match_id || !row || !column || !creditCardNumber || !creditPinNumber || !price) {
       return res.status(400).json({ message: "Please fill all fields" });
     }
     // get username form token
@@ -479,6 +479,10 @@ exports.reserve = async (req, res) => {
     reservedSeats = match.reservedSeats;
     if (reservedSeats[row][column] === 1) {
       return res.status(400).json({ message: "Seat already reserved" });
+    }
+    // check on price is a number
+    if (isNaN(parseInt(price))) {
+      return res.status(400).json({ message: "Invalid price" });
     }
     // resserve the seat
     if (isNaN(parseInt(creditCardNumber))) {
@@ -517,7 +521,7 @@ exports.reserve = async (req, res) => {
     }
     if (ticket) {
       seats = ticket.seat;
-      seats.push([row, column]);
+      seats.push([Number(row), Number(column)]);
       await Ticket.updateOne(
         { match: match_id, user: user._id },
         { $set: { seat: seats } }
@@ -528,7 +532,8 @@ exports.reserve = async (req, res) => {
     else {
       const ticket = new Ticket({
         match: match_id,
-        seat: [[row, column]],
+        seat: [[Number(row), Number(column)]],
+        price: price,
         user: user._id,
       });
       await ticket.save();
