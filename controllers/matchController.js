@@ -174,6 +174,9 @@ module.exports.createMatch = async (req, res) => {
       linesman1,
       linesman2,
     });
+    // create 2d array of zeros
+    let reservedSeats = Array.from({ length: dbstadium.rows }, () => Array(dbstadium.columns).fill(0));
+    match.reservedSeats = reservedSeats;
     const newMatch = await match.save();
     return res.status(201).json({ data: newMatch });
   } catch (error) {

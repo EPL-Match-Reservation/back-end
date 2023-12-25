@@ -26,6 +26,9 @@ const matchSchema = new mongoose.Schema(
     linesman2: {
       type: String,
     },
+    // 2d array initialy zeros
+    // 0 -> empty seat
+    // 1 -> reserved seat
     reservedSeats: [
       {
         type: Array,
