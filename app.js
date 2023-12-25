@@ -8,6 +8,7 @@ const matchRouter = require(`${__dirname}/routes/matchRouter`);
 const authRouter = require(`${__dirname}/routes/authRouter`);
 const stadiumRouter = require(`${__dirname}/routes/stadiumRouter`);
 const teamRouter = require(`${__dirname}/routes/teamRouter`);
+const reservationRouter = require(`${__dirname}/routes/reservationRouter`);
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/match", matchRouter);
 app.use("/api/v1/stadium", stadiumRouter);
 app.use("/api/v1/team", teamRouter);
+app.use("/api/v1/reservation", reservationRouter);
 // app.use("/api/v1/match", matchRouter);
 // app.use("/api/v1/stadium", matchRouter);
 // app.use("/api/v1/reservation", matchRouter);

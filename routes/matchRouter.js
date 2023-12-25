@@ -12,7 +12,8 @@ router
   .route("/")
   .post(MatchController.createMatch)
   .get(MatchController.retrievematches);
-// router.route("/:matchId").patch(MatchController.editMatch);
+
+router.route("/seat/:id").get(MatchController.getReservedSeats);
 
 module.exports = router;
 /*
