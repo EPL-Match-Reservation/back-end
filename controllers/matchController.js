@@ -81,6 +81,10 @@ module.exports.createMatch = async (req, res) => {
       linesman1,
       linesman2,
     } = req.body;
+    // print reqbody
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
     // get the home team
     const HomeTeam = await Team.findById(homeTeam);
     if (!HomeTeam) {
