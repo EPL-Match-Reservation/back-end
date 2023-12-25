@@ -14,7 +14,9 @@ module.exports.getMatch = async (req, res) => {
     // get the user
     const match = await Match.findOne({
       _id: matchID,
-    });
+    }).populate("stadium")
+    .populate("homeTeam")
+    .populate("awayTeam");
     // if the user is not found
     if (!match) {
       return res.status(404).json({ error: "Match not found" });
