@@ -6,6 +6,8 @@ const Router = express.Router();
 
 Router.route("/").get(userController.getAllUsers);
 
+Router.route("/user").get(userController.getUserData);
+
 Router.route("/nonapproved").get(userController.getAllNonApprovedUsers);
 
 Router.route("/checkusername").post(userController.checkUsername);

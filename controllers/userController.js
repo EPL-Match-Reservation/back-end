@@ -40,6 +40,34 @@ exports.validateSignUp = [
   },
 ];
 
+// get userData
+exports.getUserData = async (req, res) => {
+  try {
+    // get the role of the requeseter form the token
+    const token = req.headers["authorization"];
+    // if token is undefined
+    if (!token) {
+      return res.status(400).json({ message: "You are not logged in" });
+    }
+    const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET_KEY);
+    const username = decoded.username;
+    // if env is dev
+    if (process.env.NODE_ENV === "development") {
+      console.log(req.body);
+    }
+    //check if the user already exists
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist" });
+    }
+    // drop password field
+    user.password = undefined;
+    return  res.status(200).json({ message: "Successful get user", data: user });
+  } catch (error) {
+    return  res.status(400).json({ message: error.message });
+  }
+};
+
 // create user
 exports.createUser = async (req, res) => {
   try {

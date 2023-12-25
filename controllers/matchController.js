@@ -9,7 +9,7 @@ module.exports.getMatch = async (req, res) => {
     const matchID = req.params.id;
     // if env is dev
     if (process.env.NODE_ENV === "development") {
-      console.log(req.body);
+      console.log(matchID);
     }
     // get the user
     const match = await Match.findOne({
@@ -32,8 +32,12 @@ module.exports.getMatch = async (req, res) => {
 
 module.exports.retrievematches = async (req, res) => {
   try {
-    // get all matches
-    const matches = await Match.find().populate("stadium");
+    // get all matches with populated home and away teams
+    const matches = await Match.find()
+      .populate("stadium")
+      .populate("homeTeam")
+      .populate("awayTeam");
+      
     // if no matches
     if (!matches) {
       return res.status(404).json({ error: "No matches found" });

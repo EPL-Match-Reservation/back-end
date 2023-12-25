@@ -4,12 +4,14 @@ const MatchController = require("../controllers/matchController");
 const router = express.Router();
 
 router
-  .route("/:matchId")
+  .route("/:id")
   .get(MatchController.getMatch)
   .patch(MatchController.updateMatch);
-router.route("/").post(MatchController.createMatch);
-router.route("/").get(MatchController.retrievematches);
-router.route("/:matchId").patch(MatchController.editMatch);
+router
+  .route("/")
+  .post(MatchController.createMatch)
+  .get(MatchController.retrievematches);
+// router.route("/:matchId").patch(MatchController.editMatch);
 
 module.exports = router;
 /*
