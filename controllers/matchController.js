@@ -78,24 +78,18 @@ module.exports.createMatch = async (req, res) => {
       linesman2,
     } = req.body;
     // get the home team
-    const HomeTeam = await Team.findOne({ name: homeTeam }).select({
-      _id: 1,
-    });
+    const HomeTeam = await Team.findById(homeTeam);
     if (!HomeTeam) {
       return res.status(400).json({ message: "HomeTeam not found" });
     }
     // get the away team
-    const AwayTeam = await Team.findOne({ name: awayTeam }).select({
-      _id: 1,
-    });
+    const AwayTeam = await Team.findById(awayTeam);
     if (!AwayTeam) {
       return res.status(400).json({ message: "AwayTeam not found" });
     }
     // check if the stadium exists
     // get the stadium id from the stadium name
-    const dbstadium = await Stadium.findOne({ name: stadium }).select({
-      _id: 1,
-    });
+    const dbstadium = await Stadium.findById(stadium);
     if (!dbstadium) {
       return res.status(400).json({ message: "stadium not found" });
     }
