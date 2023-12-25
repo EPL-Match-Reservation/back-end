@@ -57,7 +57,9 @@ const addStadium = async (req, res) => {
 const getStadiums = async (req, res) => {
   try {
     const stadiums = await Stadium.find();
-    res.status(200).json(stadiums);
+    res.status(200).json({
+      data: stadiums,
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -67,7 +69,7 @@ const getStadiums = async (req, res) => {
 const getStadiumByName = async (req, res) => {
   try {
     const stadium = await Stadium.find({ name: req.body.name });
-    res.status(200).json(stadium);
+    res.status(200).json({ data: stadium });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -76,7 +78,7 @@ const getStadiumByName = async (req, res) => {
 const getStadium = async (req, res) => {
   try {
     const stadium = await Stadium.findById(req.params.id);
-    res.status(200).json(stadium);
+    res.status(200).json({ data: stadium });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

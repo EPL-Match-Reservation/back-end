@@ -330,6 +330,7 @@ module.exports.getReservedSeats = async (req, res) => {
     return res.status(400).json({ error: "Internal server error" });
   }
 };
+
 module.exports.editMatch = async (req, res) => {
     try {
         const { matchId } = req.params;

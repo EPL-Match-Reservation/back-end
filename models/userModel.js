@@ -28,8 +28,13 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.methods.generateJWT = function () {
-  console.log("generateJWT");
-  console.log(process.env.JWT_SECRET_KEY);
+  // if development
+  // if env is dev
+  if (process.env.NODE_ENV === "development") {
+    console.log("generateJWT");
+    console.log(process.env.JWT_SECRET_KEY);
+  }
+
   const token = jwt.sign(
     {
       _id: this._id,

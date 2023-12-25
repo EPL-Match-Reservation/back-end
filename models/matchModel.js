@@ -4,26 +4,22 @@ const matchSchema = new mongoose.Schema(
   {
     stadium: { type: mongoose.Schema.Types.ObjectId, ref: "Stadium" },
     HomeTeam: {
-      type: String,
-      // required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Team",
     },
     AwayTeam: {
-      type: String,
-      // required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Team",
     },
     MatchDate: {
       type: Date,
-      // required: true,
     },
     MatchTime: {
       type: String,
-      // required: true,
     },
     MainReferee: {
       type: String,
-      // required: true,
     },
-    // Linesmen: linesmanSchema,
     linesman1: {
       type: String,
     },
@@ -35,6 +31,6 @@ const matchSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const match = mongoose.model("match", matchSchema);
+const match = mongoose.model("Match", matchSchema);
 
 module.exports = match;
