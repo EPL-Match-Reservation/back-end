@@ -1,4 +1,6 @@
 const Match = require("../models/matchModel");
+const Team = require("../models/teamModel");
+const Stadium = require("../models/stadiumModel");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
@@ -67,14 +69,29 @@ module.exports.createMatch = async (req, res) => {
     }
     const {
       stadium,
-      HomeTeam,
-      AwayTeam,
-      MatchDate,
-      MatchTime,
-      MainReferee,
+      homeTeam,
+      awayTeam,
+      matchDate,
+      matchTime,
+      mainReferee,
       linesman1,
       linesman2,
     } = req.body;
+    // get the home team
+    const HomeTeam = await Team.findOne({ name: homeTeam }).select({
+      _id: 1,
+    });
+    if (!HomeTeam) {
+      return res.status(400).json({ message: "HomeTeam not found" });
+    }
+    // get the away team
+    const AwayTeam = await Team.findOne({ name: awayTeam }).select({
+      _id: 1,
+    });
+    if (!AwayTeam) {
+      return res.status(400).json({ message: "AwayTeam not found" });
+    }
+    // check if the stadium exists
     // get the stadium id from the stadium name
     const dbstadium = await Stadium.findOne({ name: stadium }).select({
       _id: 1,
@@ -85,16 +102,34 @@ module.exports.createMatch = async (req, res) => {
     //check if staduium is available on the same MatchDate
     const match1 = await Match.findOne({
       stadium: dbstadium._id,
-      MatchDate: MatchDate,
-    });
-    if (match1 && Math.abs(match1.MatchTime - MatchTime) <= 3) {
-      return res.status(400).json({ message: "stadium is not available" });
+      matchDate: matchDate,
+    });   
+    if (match1) {
+      // Extract hours and minutes from MatchTime
+      let matchTimeArray = matchTime.split(":");
+      let matchTimeHours = parseInt(matchTimeArray[0], 10);
+      let matchTimeMinutes = parseInt(matchTimeArray[1], 10);
+      let matchDateTime = new Date();
+      matchDateTime.setHours(matchTimeHours, matchTimeMinutes, 0, 0);
+
+      // Extract hours and minutes from MatchTime
+      matchTimeArray = match1.matchTime.split(":");
+      matchTimeHours = parseInt(matchTimeArray[0], 10);
+      matchTimeMinutes = parseInt(matchTimeArray[1], 10);
+      currentTime_match = new Date();
+      currentTime_match.setHours(matchTimeHours, matchTimeMinutes, 0, 0);
+      // Calculate the time difference in milliseconds
+      const timeDifference = Math.abs(matchDateTime - currentTime_match);
+      // check availability
+      if (timeDifference <= 3 * 60 * 1000) {
+        return res.status(400).json({ message: "stadium is not available" });
+      }
     }
     //check if HomeTeam or AwayTeam have match on the same MatchDate
     const match2 = await Match.findOne({
       $or: [
-        { HomeTeam: HomeTeam, MatchDate: MatchDate },
-        { AwayTeam: AwayTeam, MatchDate: MatchDate },
+        { homeTeam: HomeTeam._id, matchDate: matchDate },
+        { awayTeam: AwayTeam._id, matchDate: matchDate },
       ],
     });
     if (match2) {
@@ -103,12 +138,12 @@ module.exports.createMatch = async (req, res) => {
       });
     }
     //HomeTeam and AwayTeam can't be the same
-    if (HomeTeam == AwayTeam) {
+    if (homeTeam == awayTeam) {
       return res
         .status(400)
         .json({ message: "HomeTeam and AwayTeam can not be the same" });
     }
-    if (!HomeTeam || !AwayTeam) {
+    if (!homeTeam || !awayTeam) {
       return res
         .status(400)
         .json({ error: "please enter home team and away team" });
@@ -116,21 +151,21 @@ module.exports.createMatch = async (req, res) => {
     if (!linesman2 || !linesman1) {
       return res.status(400).json({ error: "please enter both linesmen" });
     }
-    if (!MainReferee) {
+    if (!mainReferee) {
       return res.status(400).json({ error: "please enter MainReferee name" });
     }
     const match = new Match({
       stadium: dbstadium._id,
-      HomeTeam,
-      AwayTeam,
-      MatchDate,
-      MatchTime,
-      MainReferee,
+      homeTeam: HomeTeam._id,
+      awayTeam: AwayTeam._id,
+      matchDate,
+      matchTime,
+      mainReferee,
       linesman1,
       linesman2,
     });
     const newMatch = await match.save();
-    return res.status(201).json(newMatch);
+    return res.status(201).json({ data: newMatch });
   } catch (error) {
     console.error("Error creating match:", error);
 
@@ -332,30 +367,30 @@ module.exports.getReservedSeats = async (req, res) => {
 };
 
 module.exports.editMatch = async (req, res) => {
-    try {
-        const { matchId } = req.params;
-        const match = await this.MatchService.editMatch(matchId);
+  try {
+    const { matchId } = req.params;
+    const match = await this.MatchService.editMatch(matchId);
 
-        if (!match) {
-            return res.status(400).json({ message: 'Match not found' });
-        }
-
-        // Update fields if provided in the request body
-        match.HomeTeam = req.body.HomeTeam || match.HomeTeam;
-        match.AwayTeam = req.body.AwayTeam || match.AwayTeam;
-        match.MatchVenue = req.body.MatchVenue || match.MatchVenue;
-        match.MatchDate = req.body.MatchDate || match.MatchDate;
-        match.MatchTime = req.body.MatchTime || match.MatchTime;
-        match.linesman1 = req.body.linesman1 || match.linesman1;
-        match.linesman2 = req.body.linesman2 || match.linesman2;
-        match.MainReferee = req.body.MainReferee || match.MainReferee;
-
-        // Save the updated match
-        const updatedMatch = await match.save();
-
-        res.status(200).json({ message: 'Match updated', updatedMatch });
-    } catch (error) {
-        console.error("Error updating match:", error);
-        res.status(500).json({ message: 'Internal server error' });
+    if (!match) {
+      return res.status(400).json({ message: "Match not found" });
     }
+
+    // Update fields if provided in the request body
+    match.HomeTeam = req.body.HomeTeam || match.HomeTeam;
+    match.AwayTeam = req.body.AwayTeam || match.AwayTeam;
+    match.MatchVenue = req.body.MatchVenue || match.MatchVenue;
+    match.MatchDate = req.body.MatchDate || match.MatchDate;
+    match.MatchTime = req.body.MatchTime || match.MatchTime;
+    match.linesman1 = req.body.linesman1 || match.linesman1;
+    match.linesman2 = req.body.linesman2 || match.linesman2;
+    match.MainReferee = req.body.MainReferee || match.MainReferee;
+
+    // Save the updated match
+    const updatedMatch = await match.save();
+
+    res.status(200).json({ message: "Match updated", updatedMatch });
+  } catch (error) {
+    console.error("Error updating match:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };

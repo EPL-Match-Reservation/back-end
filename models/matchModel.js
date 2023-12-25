@@ -3,21 +3,21 @@ const mongoose = require("mongoose");
 const matchSchema = new mongoose.Schema(
   {
     stadium: { type: mongoose.Schema.Types.ObjectId, ref: "Stadium" },
-    HomeTeam: {
+    homeTeam: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Team",
     },
-    AwayTeam: {
+    awayTeam: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Team",
     },
-    MatchDate: {
+    matchDate: {
       type: Date,
     },
-    MatchTime: {
+    matchTime: {
       type: String,
     },
-    MainReferee: {
+    mainReferee: {
       type: String,
     },
     linesman1: {
@@ -26,7 +26,14 @@ const matchSchema = new mongoose.Schema(
     linesman2: {
       type: String,
     },
-    reservedSeats: [{ type: Number }],
+    reservedSeats: [
+      {
+        type: Array,
+        items: {
+          type: Number,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
