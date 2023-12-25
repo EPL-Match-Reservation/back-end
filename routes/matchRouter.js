@@ -6,7 +6,8 @@ const router = express.Router();
 router
   .route("/:id")
   .get(MatchController.getMatch)
-  .patch(MatchController.updateMatch);
+  .patch(MatchController.updateMatch)
+  .delete(MatchController.deleteMatch);
 router
   .route("/")
   .post(MatchController.createMatch)
