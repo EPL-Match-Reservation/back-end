@@ -86,7 +86,9 @@ module.exports.createMatch = async (req, res) => {
       console.log(req.body);
     }
     // get the home team
+    console.log(homeTeam);
     const HomeTeam = await Team.findById(homeTeam);
+    console.log(HomeTeam);
     if (!HomeTeam) {
       return res.status(400).json({ message: "HomeTeam not found" });
     }
@@ -100,6 +102,12 @@ module.exports.createMatch = async (req, res) => {
     const dbstadium = await Stadium.findById(stadium);
     if (!dbstadium) {
       return res.status(400).json({ message: "stadium not found" });
+    }
+    // check if the data is oldone
+    const currentTime_date = new Date();
+    const matchDateTime_date = new Date(matchDate);
+    if (matchDateTime_date < currentTime_date) {
+      return res.status(400).json({ message: "match date is old" });
     }
     //check if staduium is available on the same MatchDate
     const match1 = await Match.findOne({
